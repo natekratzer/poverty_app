@@ -1,4 +1,4 @@
-df<-read.csv("equity data.csv",header=TRUE)
+df<-read.csv("poverty data.csv",header=TRUE)
 library(shiny)
 library(ggplot2)
 library(classInt)
@@ -25,7 +25,7 @@ rank_and_nb_group<-function(df, var, order="descending"){
   d.graph$color[d.graph$var<=breaks$brks[2]]<-"green"
   d.graph$color[d.graph$var>breaks$brks[2] & d.graph$var<=breaks$brks[3]]<-"yellow"
   d.graph$color[d.graph$var>breaks$brks[3]]<-"red"
-  d.graph$round<-format(round(d.graph$var, 2), nsmall = 2)
+  d.graph$round<-format(round(d.graph$var, 0), nsmall = 0)
   d.graph$textfont<-"plain"
   d.graph$textfont[d.graph$Name=="Louisville"]<-"bold"
   d.graph$linecolor<-"white"
@@ -44,6 +44,7 @@ rank_and_nb_group<-function(df, var, order="descending"){
   p<-p+theme(axis.text.y=element_text(hjust=0,face=rev(d.graph$textfont),
                                       size=12))
   p<-p+theme(axis.ticks=element_blank(),axis.text.x=element_blank())
+  p<-p+theme(plot.title=element_text(size=16, face="bold"))
   p<-p+geom_text(aes(label=round),hjust=1.1,size=5,fontface="bold")
   p<-p+labs(title="",x="",
             y="")
@@ -55,55 +56,305 @@ shinyServer(
     
     #matching names with inputs
     var1 <- reactive({
-      switch(input$var1, 
-             "Low Income Female Life Expectancy" = df$le_agg_q1_F,
-             "Low Income Male Life Expectancy" = df$le_agg_q1_M,
-             "Low Income Smoking Percent"=df$cur_smoke_q1,
-             "Low Income Obesity Rate"=df$bmi_obese_q1,
-             "Low Income Exercise in last 30 days"=df$exercise_any_q1)
+      switch(input$var1,
+             "Low Income - All Races" = df$Low.income,
+             "Poor Locale - All Races"= df$Poor.locale,
+             "Limited Education - All Races"= df$Limited.education,
+             "No Health Insurance - All Races" = df$No.health.insurance,
+             "Unemployment - All Races" = df$Unemployment,
+             "At Least Doubly Disadvantaged - All Races" = df$At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - All Races" = df$Low.income.and.poor.locale,
+             "Low Income and Limited Education - All Races" = df$Low.income.and.limited.education,
+             "Low Income and No Health Insurance - All Races" = df$Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - All Races" = df$Low.income.and.unemployment,
+             "Low Income - Black" = df$B.Low.income,
+             "Poor Locale - Black" = df$B.Poor.locale,
+             "Limited Education - Black" = df$B.Limited.education,
+             "No Health Insurance - Black" = df$B.No.health.insurance,
+             "Unemployment - Black" = df$B.Unemployment,
+             "At Least Doubly Disadvantaged - Black" = df$B.At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - Black" = df$B.Low.income.and.poor.locale,
+             "Low Income and Limited Education - Black" = df$B.Low.income.and.limited.education,
+             "Low Income and No Health Insurance - Black" = df$B.Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - Black" = df$B.Low.income.and.unemployment,
+             "Low Income - Hispanic" = df$H.Low.income,
+             "Poor Locale - Hispanic"= df$H.Poor.locale,
+             "Limited Education - Hispanic" = df$H.Limited.education,
+             "No Health Insurance - Hispanic" = df$H.No.health.insurance,
+             "Unemployment - Hispanic"  = df$H.Unemployment,
+             "At Least Doubly Disadvantaged - Hispanic" = df$H.At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - Hispanic" = df$H.Low.income.and.poor.locale,
+             "Low Income and Limited Education - Hispanic" = df$H.Low.income.and.limited.education,
+             "Low Income and No Health Insurance - Hispanic" = df$H.Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - Hispanic" = df$H.Low.income.and.unemployment,
+             "Low Income - White" = df$W.Low.income,
+             "Poor Locale - White" = df$W.Poor.locale,
+             "Limited Education - White" = df$W.Limited.education,
+             "No Health Insurance - White" = df$W.No.health.insurance,
+             "Unemployment - White" = df$W.Unemployment,
+             "At Least Doubly Disadvantaged - White" = df$W.At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - White" = df$W.Low.income.and.poor.locale,
+             "Low Income and Limited Education - White" = df$W.Low.income.and.limited.education,
+             "Low Income and No Health Insurance - White" = df$W.Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - White" = df$W.Low.income.and.unemployment,
+             "Years of Potential Life Lost Rate" = df$Years.of.Potential.Life.Lost.Rate,
+             "Percent in Fair or Poor Health" = df$Fair_Poor_Health_Percent,
+             "Physically unhealthy days" = df$Physically.Unhealthy.Days,
+             "Mentally unhealthy days" = df$Mentally.Unhealthy.Days,
+             "Female Life Expectancy - Low Income" = df$le_agg_q1_F,
+             "Male Life Expectancy - Low Income" = df$le_agg_q1_M,
+             "Smoking Percent- Low Income"=df$cur_smoke_q1,
+             "Obesity Rate - Low Income"=df$bmi_obese_q1,
+             "Exercise in last 30 days - Low Income"=df$exercise_any_q1,
+             "Hospital Mortality Rate Index" = df$mort_30day_hosp_z,
+             "Social Capital Index" = df$scap_ski90pcm,
+             "Income Segregation" = df$cs00_seg_inc,
+             "Poverty Segregation" = df$cs_00_seg_inc_pov25,
+             "Segregation of Affluence" = df$cs_00_seg_inc_aff75,
+             "Racial Segregation" = df$cs_race_theil_2000,
+             "Inequality - Gini Index" = df$gini99,
+             "Fraction Middle Class" = df$frac_middleclass,
+             "Labor Force Participation" = df$cs_labforce,
+             "Median House Value" = df$median_house_value,
+             "Economic Mobility" = df$e_rank_b,
+             "Percent Black" = df$percent_black,
+             "Percent Hispanic" = df$percent_hispanic,
+             "Percent White" = df$percent_white)
              
     })
     var2 <- reactive({
       switch(input$var2, 
-             "Low Income Female Life Expectancy" = df$le_agg_q1_F,
-             "Low Income Male Life Expectancy" = df$le_agg_q1_M,
-             "Low Income Smoking Percent"=df$cur_smoke_q1,
-             "Low Income Obesity Rate"=df$bmi_obese_q1,
-             "Low Income Exercise in last 30 days"=df$exercise_any_q1)
+             "Low Income - All Races" = df$Low.income,
+             "Poor Locale - All Races"= df$Poor.locale,
+             "Limited Education - All Races"= df$Limited.education,
+             "No Health Insurance - All Races" = df$No.health.insurance,
+             "Unemployment - All Races" = df$Unemployment,
+             "At Least Doubly Disadvantaged - All Races" = df$At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - All Races" = df$Low.income.and.poor.locale,
+             "Low Income and Limited Education - All Races" = df$Low.income.and.limited.education,
+             "Low Income and No Health Insurance - All Races" = df$Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - All Races" = df$Low.income.and.unemployment,
+             "Low Income - Black" = df$B.Low.income,
+             "Poor Locale - Black" = df$B.Poor.locale,
+             "Limited Education - Black" = df$B.Limited.education,
+             "No Health Insurance - Black" = df$B.No.health.insurance,
+             "Unemployment - Black" = df$B.Unemployment,
+             "At Least Doubly Disadvantaged - Black" = df$B.At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - Black" = df$B.Low.income.and.poor.locale,
+             "Low Income and Limited Education - Black" = df$B.Low.income.and.limited.education,
+             "Low Income and No Health Insurance - Black" = df$B.Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - Black" = df$B.Low.income.and.unemployment,
+             "Low Income - Hispanic" = df$H.Low.income,
+             "Poor Locale - Hispanic"= df$H.Poor.locale,
+             "Limited Education - Hispanic" = df$H.Limited.education,
+             "No Health Insurance - Hispanic" = df$H.No.health.insurance,
+             "Unemployment - Hispanic"  = df$H.Unemployment,
+             "At Least Doubly Disadvantaged - Hispanic" = df$H.At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - Hispanic" = df$H.Low.income.and.poor.locale,
+             "Low Income and Limited Education - Hispanic" = df$H.Low.income.and.limited.education,
+             "Low Income and No Health Insurance - Hispanic" = df$H.Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - Hispanic" = df$H.Low.income.and.unemployment,
+             "Low Income - White" = df$W.Low.income,
+             "Poor Locale - White" = df$W.Poor.locale,
+             "Limited Education - White" = df$W.Limited.education,
+             "No Health Insurance - White" = df$W.No.health.insurance,
+             "Unemployment - White" = df$W.Unemployment,
+             "At Least Doubly Disadvantaged - White" = df$W.At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - White" = df$W.Low.income.and.poor.locale,
+             "Low Income and Limited Education - White" = df$W.Low.income.and.limited.education,
+             "Low Income and No Health Insurance - White" = df$W.Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - White" = df$W.Low.income.and.unemployment,
+             "Years of Potential Life Lost Rate" = df$Years.of.Potential.Life.Lost.Rate,
+             "Percent in Fair or Poor Health" = df$Fair_Poor_Health_Percent,
+             "Physically unhealthy days" = df$Physically.Unhealthy.Days,
+             "Mentally unhealthy days" = df$Mentally.Unhealthy.Days,
+             "Female Life Expectancy - Low Income" = df$le_agg_q1_F,
+             "Male Life Expectancy - Low Income" = df$le_agg_q1_M,
+             "Smoking Percent- Low Income"=df$cur_smoke_q1,
+             "Obesity Rate - Low Income"=df$bmi_obese_q1,
+             "Exercise in last 30 days - Low Income"=df$exercise_any_q1,
+             "Hospital Mortality Rate Index" = df$mort_30day_hosp_z,
+             "Social Capital Index" = df$scap_ski90pcm,
+             "Income Segregation" = df$cs00_seg_inc,
+             "Poverty Segregation" = df$cs_00_seg_inc_pov25,
+             "Segregation of Affluence" = df$cs_00_seg_inc_aff75,
+             "Racial Segregation" = df$cs_race_theil_2000,
+             "Inequality - Gini Index" = df$gini99,
+             "Fraction Middle Class" = df$frac_middleclass,
+             "Labor Force Participation" = df$cs_labforce,
+             "Median House Value" = df$median_house_value,
+             "Economic Mobility" = df$e_rank_b,
+             "Percent Black" = df$percent_black,
+             "Percent Hispanic" = df$percent_hispanic,
+             "Percent White" = df$percent_white)
     })
     var3 <- reactive({
       switch(input$var3, 
-             "Low Income Female Life Expectancy" = df$le_agg_q1_F,
-             "Low Income Male Life Expectancy" = df$le_agg_q1_M,
-             "Low Income Smoking Percent"=df$cur_smoke_q1,
-             "Low Income Obesity Rate"=df$bmi_obese_q1,
-             "Low Income Exercise in last 30 days"=df$exercise_any_q1)
+             "Low Income - All Races" = df$Low.income,
+             "Poor Locale - All Races"= df$Poor.locale,
+             "Limited Education - All Races"= df$Limited.education,
+             "No Health Insurance - All Races" = df$No.health.insurance,
+             "Unemployment - All Races" = df$Unemployment,
+             "At Least Doubly Disadvantaged - All Races" = df$At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - All Races" = df$Low.income.and.poor.locale,
+             "Low Income and Limited Education - All Races" = df$Low.income.and.limited.education,
+             "Low Income and No Health Insurance - All Races" = df$Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - All Races" = df$Low.income.and.unemployment,
+             "Low Income - Black" = df$B.Low.income,
+             "Poor Locale - Black" = df$B.Poor.locale,
+             "Limited Education - Black" = df$B.Limited.education,
+             "No Health Insurance - Black" = df$B.No.health.insurance,
+             "Unemployment - Black" = df$B.Unemployment,
+             "At Least Doubly Disadvantaged - Black" = df$B.At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - Black" = df$B.Low.income.and.poor.locale,
+             "Low Income and Limited Education - Black" = df$B.Low.income.and.limited.education,
+             "Low Income and No Health Insurance - Black" = df$B.Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - Black" = df$B.Low.income.and.unemployment,
+             "Low Income - Hispanic" = df$H.Low.income,
+             "Poor Locale - Hispanic"= df$H.Poor.locale,
+             "Limited Education - Hispanic" = df$H.Limited.education,
+             "No Health Insurance - Hispanic" = df$H.No.health.insurance,
+             "Unemployment - Hispanic"  = df$H.Unemployment,
+             "At Least Doubly Disadvantaged - Hispanic" = df$H.At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - Hispanic" = df$H.Low.income.and.poor.locale,
+             "Low Income and Limited Education - Hispanic" = df$H.Low.income.and.limited.education,
+             "Low Income and No Health Insurance - Hispanic" = df$H.Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - Hispanic" = df$H.Low.income.and.unemployment,
+             "Low Income - White" = df$W.Low.income,
+             "Poor Locale - White" = df$W.Poor.locale,
+             "Limited Education - White" = df$W.Limited.education,
+             "No Health Insurance - White" = df$W.No.health.insurance,
+             "Unemployment - White" = df$W.Unemployment,
+             "At Least Doubly Disadvantaged - White" = df$W.At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - White" = df$W.Low.income.and.poor.locale,
+             "Low Income and Limited Education - White" = df$W.Low.income.and.limited.education,
+             "Low Income and No Health Insurance - White" = df$W.Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - White" = df$W.Low.income.and.unemployment,
+             "Years of Potential Life Lost Rate" = df$Years.of.Potential.Life.Lost.Rate,
+             "Percent in Fair or Poor Health" = df$Fair_Poor_Health_Percent,
+             "Physically unhealthy days" = df$Physically.Unhealthy.Days,
+             "Mentally unhealthy days" = df$Mentally.Unhealthy.Days,
+             "Female Life Expectancy - Low Income" = df$le_agg_q1_F,
+             "Male Life Expectancy - Low Income" = df$le_agg_q1_M,
+             "Smoking Percent- Low Income"=df$cur_smoke_q1,
+             "Obesity Rate - Low Income"=df$bmi_obese_q1,
+             "Exercise in last 30 days - Low Income"=df$exercise_any_q1,
+             "Hospital Mortality Rate Index" = df$mort_30day_hosp_z,
+             "Social Capital Index" = df$scap_ski90pcm,
+             "Income Segregation" = df$cs00_seg_inc,
+             "Poverty Segregation" = df$cs_00_seg_inc_pov25,
+             "Segregation of Affluence" = df$cs_00_seg_inc_aff75,
+             "Racial Segregation" = df$cs_race_theil_2000,
+             "Inequality - Gini Index" = df$gini99,
+             "Fraction Middle Class" = df$frac_middleclass,
+             "Labor Force Participation" = df$cs_labforce,
+             "Median House Value" = df$median_house_value,
+             "Economic Mobility" = df$e_rank_b,
+             "Percent Black" = df$percent_black,
+             "Percent Hispanic" = df$percent_hispanic,
+             "Percent White" = df$percent_white)
     })
     var4 <- reactive({
       switch(input$var4, 
-             "Low Income Female Life Expectancy" = df$le_agg_q1_F,
-             "Low Income Male Life Expectancy" = df$le_agg_q1_M,
-             "Low Income Smoking Percent"=df$cur_smoke_q1,
-             "Low Income Obesity Rate"=df$bmi_obese_q1,
-             "Low Income Exercise in last 30 days"=df$exercise_any_q1)
+             "Low Income - All Races" = df$Low.income,
+             "Poor Locale - All Races"= df$Poor.locale,
+             "Limited Education - All Races"= df$Limited.education,
+             "No Health Insurance - All Races" = df$No.health.insurance,
+             "Unemployment - All Races" = df$Unemployment,
+             "At Least Doubly Disadvantaged - All Races" = df$At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - All Races" = df$Low.income.and.poor.locale,
+             "Low Income and Limited Education - All Races" = df$Low.income.and.limited.education,
+             "Low Income and No Health Insurance - All Races" = df$Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - All Races" = df$Low.income.and.unemployment,
+             "Low Income - Black" = df$B.Low.income,
+             "Poor Locale - Black" = df$B.Poor.locale,
+             "Limited Education - Black" = df$B.Limited.education,
+             "No Health Insurance - Black" = df$B.No.health.insurance,
+             "Unemployment - Black" = df$B.Unemployment,
+             "At Least Doubly Disadvantaged - Black" = df$B.At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - Black" = df$B.Low.income.and.poor.locale,
+             "Low Income and Limited Education - Black" = df$B.Low.income.and.limited.education,
+             "Low Income and No Health Insurance - Black" = df$B.Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - Black" = df$B.Low.income.and.unemployment,
+             "Low Income - Hispanic" = df$H.Low.income,
+             "Poor Locale - Hispanic"= df$H.Poor.locale,
+             "Limited Education - Hispanic" = df$H.Limited.education,
+             "No Health Insurance - Hispanic" = df$H.No.health.insurance,
+             "Unemployment - Hispanic"  = df$H.Unemployment,
+             "At Least Doubly Disadvantaged - Hispanic" = df$H.At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - Hispanic" = df$H.Low.income.and.poor.locale,
+             "Low Income and Limited Education - Hispanic" = df$H.Low.income.and.limited.education,
+             "Low Income and No Health Insurance - Hispanic" = df$H.Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - Hispanic" = df$H.Low.income.and.unemployment,
+             "Low Income - White" = df$W.Low.income,
+             "Poor Locale - White" = df$W.Poor.locale,
+             "Limited Education - White" = df$W.Limited.education,
+             "No Health Insurance - White" = df$W.No.health.insurance,
+             "Unemployment - White" = df$W.Unemployment,
+             "At Least Doubly Disadvantaged - White" = df$W.At.least.doubly.disadvantaged,
+             "Low Income and Poor Locale - White" = df$W.Low.income.and.poor.locale,
+             "Low Income and Limited Education - White" = df$W.Low.income.and.limited.education,
+             "Low Income and No Health Insurance - White" = df$W.Low.income.and.no.health.insurance,
+             "Low Income and Unemployment - White" = df$W.Low.income.and.unemployment,
+             "Years of Potential Life Lost Rate" = df$Years.of.Potential.Life.Lost.Rate,
+             "Percent in Fair or Poor Health" = df$Fair_Poor_Health_Percent,
+             "Physically unhealthy days" = df$Physically.Unhealthy.Days,
+             "Mentally unhealthy days" = df$Mentally.Unhealthy.Days,
+             "Female Life Expectancy - Low Income" = df$le_agg_q1_F,
+             "Male Life Expectancy - Low Income" = df$le_agg_q1_M,
+             "Smoking Percent- Low Income"=df$cur_smoke_q1,
+             "Obesity Rate - Low Income"=df$bmi_obese_q1,
+             "Exercise in last 30 days - Low Income"=df$exercise_any_q1,
+             "Hospital Mortality Rate Index" = df$mort_30day_hosp_z,
+             "Social Capital Index" = df$scap_ski90pcm,
+             "Income Segregation" = df$cs00_seg_inc,
+             "Poverty Segregation" = df$cs_00_seg_inc_pov25,
+             "Segregation of Affluence" = df$cs_00_seg_inc_aff75,
+             "Racial Segregation" = df$cs_race_theil_2000,
+             "Inequality - Gini Index" = df$gini99,
+             "Fraction Middle Class" = df$frac_middleclass,
+             "Labor Force Participation" = df$cs_labforce,
+             "Median House Value" = df$median_house_value,
+             "Economic Mobility" = df$e_rank_b,
+             "Percent Black" = df$percent_black,
+             "Percent Hispanic" = df$percent_hispanic,
+             "Percent White" = df$percent_white)
     })
 
     order_one <- reactive({
-      if(input$var1=="Low Income Obesity Rate"|
-         input$var1=="Low Income Smoking Percent"){
-        order<-"ascending"
-      }else{
+      if(input$var1=="Low Income Female Life Expectancy"|
+         input$var1=="Low Income Male Life Expectancy"|
+         input$var1=="Low Income Exercise in last 30 days"|
+         input$var1=="Social Capital Index"|
+         input$var1=="Fraction Middle Class"|
+         input$var1=="Absolute Mobility"|
+         input$var1=="Median House Value"|
+         input$var1=="Labor Force Participation"|
+         input$var1=="Percent Black"|
+         input$var1=="Percent Hispanic"|
+         input$var1=="Percent White"){
         order<-"descending"
+      }else{
+        order<-"ascending"
         }
       order
     })
     
     order_two <- reactive({
-      if(input$var2=="Low Income Obesity Rate"|
-         input$var2=="Low Income Smoking Percent"){
-        order<-"ascending"
-      }else{
+      if(input$var2=="Low Income Female Life Expectancy"|
+         input$var2=="Low Income Male Life Expectancy"|
+         input$var2=="Low Income Exercise in last 30 days"|
+         input$var2=="Social Capital Index"|
+         input$var2=="Fraction Middle Class"|
+         input$var2=="Absolute Mobility"|
+         input$var2=="Median House Value"|
+         input$var2=="Labor Force Participation"|
+         input$var2=="Percent Black"|
+         input$var2=="Percent Hispanic"|
+         input$var2=="Percent White"){
         order<-"descending"
+      }else{
+        order<-"ascending"
       }
       order
     })
@@ -169,6 +420,7 @@ shinyServer(
       p<-p+theme(axis.text.y=element_text(hjust=0,face=rev(d.graph$textfont),
                                           size=12))
       p<-p+theme(axis.ticks=element_blank(),axis.text.x=element_blank())
+      p<-p+theme(plot.title=element_text(size=16, face="bold"))
       p<-p+geom_text(aes(label=round),hjust=1.1,size=5,fontface="bold")
       title_text<-paste(input$var4,"minus",input$var3,sep=" ")
       p<-p+labs(title=title_text, y="", x="")
