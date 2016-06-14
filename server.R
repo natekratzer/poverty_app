@@ -4,6 +4,7 @@ library(ggplot2)
 library(classInt)
 library(ggthemes)
 library(grid)
+library(stringr)
 
 rank_and_nb_group<-function(df, var, order="descending"){
   df<-df
@@ -25,7 +26,11 @@ rank_and_nb_group<-function(df, var, order="descending"){
   d.graph$color[d.graph$var<=breaks$brks[2]]<-"green"
   d.graph$color[d.graph$var>breaks$brks[2] & d.graph$var<=breaks$brks[3]]<-"yellow"
   d.graph$color[d.graph$var>breaks$brks[3]]<-"red"
-  d.graph$round<-format(round(d.graph$var, 0), nsmall = 0)
+  if(all(d.graph$var<=2 & d.graph$var>=-2)){
+    d.graph$round<-format(round(d.graph$var, 2), nsmall = 2)
+  }else{
+    d.graph$round<-format(round(d.graph$var, 0), nsmall = 0)
+  }
   d.graph$textfont<-"plain"
   d.graph$textfont[d.graph$Name=="Louisville"]<-"bold"
   d.graph$linecolor<-"white"
@@ -109,8 +114,8 @@ shinyServer(
              "Hospital Mortality Rate Index" = df$mort_30day_hosp_z,
              "Social Capital Index" = df$scap_ski90pcm,
              "Income Segregation" = df$cs00_seg_inc,
-             "Poverty Segregation" = df$cs_00_seg_inc_pov25,
-             "Segregation of Affluence" = df$cs_00_seg_inc_aff75,
+             "Poverty Segregation" = df$cs00_seg_inc_pov25,
+             "Segregation of Affluence" = df$cs00_seg_inc_aff75,
              "Racial Segregation" = df$cs_race_theil_2000,
              "Inequality - Gini Index" = df$gini99,
              "Fraction Middle Class" = df$frac_middleclass,
@@ -416,14 +421,15 @@ shinyServer(
       p<-ggplot(data=d.graph,aes(x=factor(names, levels=rev(unique(names))),
                                  y=var*100,fill=factor(color)))+guides(fill=FALSE)
       p<-p+geom_bar(stat="identity",color=rev(d.graph$linecolor))+coord_flip()+theme_tufte()
-      p<-p+scale_fill_manual(values=c("red2","green3","yellow2"))
+      p<-p+scale_fill_manual(values=c("green3","red2","yellow2"))
       p<-p+theme(axis.text.y=element_text(hjust=0,face=rev(d.graph$textfont),
                                           size=12))
       p<-p+theme(axis.ticks=element_blank(),axis.text.x=element_blank())
       p<-p+theme(plot.title=element_text(size=16, face="bold"))
       p<-p+geom_text(aes(label=round),hjust=1.1,size=5,fontface="bold")
-      title_text<-paste(input$var4,"minus",input$var3,sep=" ")
-      p<-p+labs(title=title_text, y="", x="")
+      title_text<-paste(input$var3,"minus",input$var4,sep=" ")
+      title_text_wrap<-str_wrap(title_text, width = 70)
+      p<-p+labs(title=title_text_wrap, y="", x="")
       p
     })
     output$scatter1 <- renderPlot({
@@ -444,7 +450,8 @@ shinyServer(
       p<-p+geom_text(aes(label=Display),fontface=df$textfont, color=df$textcolor)
       p<-p+theme_bw()
       title_text<-paste(input$var1,"and",input$var2,sep=" ")
-      p<-p+labs(title=title_text,x=input$var1,
+      title_text_wrap<-str_wrap(title_text, width = 70)
+      p<-p+labs(title=title_text_wrap,x=input$var1,
                 y=input$var2)
       p
     })
@@ -468,9 +475,11 @@ shinyServer(
       p<-p+geom_text(aes(label=Display),fontface=df$textfont, color=df$textcolor)
       p<-p+theme_bw()
       title_text<-paste(input$var1,"and",input$var4,"minus",input$var3,sep=" ")
+      title_text_wrap<-str_wrap(title_text, width = 70)
       y_text<-paste(input$var4,"minus",input$var3,sep=" ")
-      p<-p+labs(title=title_text,x=input$var1,
-                y=y_text)
+      y_text_wrap<-str_wrap(y_text, width=50)
+      p<-p+labs(title=title_text_wrap,x=input$var1,
+                y=y_text_wrap)
       p
     })
 
